@@ -1,0 +1,210 @@
+/* --- Estilos Gerais --- */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f7f9; /* Fundo cinza claro */
+}
+
+.dash-app-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* --- Estilo de Cabeçalho (Grupo Sinal) --- */
+.header-section {
+    background-color: #1f3b58; /* Azul Marinho Escuro Corporativo */
+    color: white;
+    padding: 20px 50px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-title {
+    font-size: 2.2em;
+    color: white; 
+    margin: 0;
+    padding: 15px 0 5px 0;
+    font-weight: 700;
+}
+
+.update-info {
+    font-size: 0.9em;
+    color: #cccccc;
+    margin: 5px 0 0 0;
+}
+
+.section-title {
+    color: #1f3b58;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 5px;
+}
+
+/* --- Estilos da Grade de KPIs e Cards --- */
+
+/* Regra base para todas as grades de KPI */
+.kpi-grid {
+    display: grid;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+/* 1. Grade Principal (5 Cards Globais) */
+.kpi-grid.five-columns {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+/* 2. Grade Secundária/Dinâmica (3 Cards/Listas) */
+.kpi-grid.three-columns {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.kpi-card {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border-left: 5px solid #007bff; /* Borda azul padrão */
+}
+
+.kpi-card h3 {
+    font-size: 1em;
+    color: #555;
+    margin-top: 0;
+    font-weight: 600;
+}
+
+.kpi-value {
+    font-size: 2.2em;
+    font-weight: bold;
+    color: #1f3b58;
+    margin: 5px 0;
+}
+
+.kpi-card small {
+    display: block;
+    color: #777;
+    margin-top: 10px;
+    font-size: 0.85em;
+}
+
+/* Destaques e Cores Especiais */
+.kpi-card.highlight {
+    border-left-color: #ff9800; /* Laranja para Médias e Eficiência */
+}
+
+.kpi-card.success-card {
+    border-left-color: #4caf50; /* Verde para Sucesso/Top */
+}
+
+.kpi-card.warning-card {
+    border-left-color: #f44336; /* Vermelho para Atenção/Bottom */
+}
+
+/* Estilo para as listas internas (Top 3) */
+.kpi-list {
+    text-align: left;
+    padding: 10px 0 0 10px;
+}
+
+.kpi-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.kpi-list li {
+    font-size: 0.9em;
+    color: #333;
+    padding: 5px 0;
+}
+
+/* --- Responsividade --- */
+
+@media (max-width: 1200px) {
+    /* 5 Cards passam a ter 3 colunas */
+    .kpi-grid.five-columns {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    /* 3 Cards passam a ter 2 colunas */
+    .kpi-grid.three-columns {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    /* Ambos os grupos passam a ter 1 coluna em telas de celular */
+    .kpi-grid.five-columns,
+    .kpi-grid.three-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .header-section {
+        padding: 15px 20px;
+    }
+    
+    .dashboard-title {
+        font-size: 1.8em;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* --- Estilos para a Tabela de Dados (Substitui Gráficos) --- */
+/* ------------------------------------------------------------------ */
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 1em;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.header-cell {
+    background-color: #1f3b58; /* Azul escuro corporativo (Grupo Sinal) */
+    color: white;
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #ced4da;
+}
+
+.data-cell {
+    padding: 12px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: left;
+}
+
+.data-row:nth-child(even) {
+    background-color: #f8f9fa; /* Listra clara para facilitar a leitura */
+}
+
+.data-row:hover {
+    background-color: #e9ecef; /* Destaque ao passar o mouse */
+}
+
+/* Formatação Condicional para as Linhas (Cores Acionáveis) */
+
+/* Alta Performance (Verde - Eficiência > 15%) */
+.data-row.alta-performance {
+    background-color: #d4edda; /* Fundo verde suave */
+    color: #155724; /* Texto verde escuro */
+    font-weight: bold;
+}
+
+/* Baixa Eficiência (Vermelho - Eficiência < 5%) */
+.data-row.baixa-eficiencia {
+    background-color: #f8d7da; /* Fundo vermelho suave */
+    color: #721c24; /* Texto vermelho escuro */
+    font-weight: bold;
+}
+
+/* Monitorar (Amarelo - Eficiência entre 5% e 15%) */
+.data-row.monitorar {
+    background-color: #fff3cd; /* Fundo amarelo suave */
+    color: #856404; /* Texto amarelo escuro */
+}
