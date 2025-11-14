@@ -40,6 +40,9 @@ try:
         "ligacoes_efetuadas", "confirmacoes_ligacoes"
     ]
 
+    # ✅ CORREÇÃO: Remover linhas onde a coluna 'nome' está vazia (NaN)
+    df.dropna(subset=['nome'], inplace=True) 
+
     # Ajustar tipos de dados e tratar valores ausentes como 0
     df['qtd_convites'] = pd.to_numeric(df['qtd_convites'], errors='coerce').fillna(0)
     df['meta_convites'] = pd.to_numeric(df['meta_convites'], errors='coerce').fillna(0)
@@ -85,10 +88,8 @@ app = dash.Dash(__name__, suppress_callback_exceptions=True)
 app.layout = html.Div(children=[
     html.Div(className='header-section', children=[
         html.Div(className='header-content-wrapper', children=[ 
-            # LOGO REMOVIDA
             html.Div(className='header-text-container', children=[
                 html.H1("🏆 Dashboard de Performance por Unidades - Grupo Sinal", className='dashboard-title grupo-sinal-header'),
-                # LINHA DE ATUALIZAÇÃO REMOVIDA
             ])
         ])
     ]),
