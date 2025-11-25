@@ -1,0 +1,263 @@
+/* --- Estilos Gerais --- */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #101010; /* Fundo escuro/quase preto como o SMVZAP */
+    color: #f0f0f0; /* Texto claro padrão */
+}
+
+.dash-app-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* --- Estilo de Cabeçalho (Grupo Sinal - Adaptado ao SMVZAP) --- */
+.header-section {
+    background-color: #1a1a1a; /* Um pouco mais claro que o fundo para contraste sutil */
+    color: white;
+    padding: 15px 50px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); /* Sombra mais escura para fundo escuro */
+    border-bottom: 2px solid #ffd700; /* Borda inferior amarela vibrante */
+}
+
+/* Container para centralizar o título que agora está sozinho */
+.header-content-wrapper {
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Estas classes não são mais usadas, mas não geram erro */
+.header-logo {
+    height: 40px; 
+    width: auto; 
+    margin-right: 15px; 
+}
+
+/* Garante que o texto fique centralizado */
+.header-text-container {
+    text-align: center; 
+}
+
+.dashboard-title {
+    font-size: 2.2em;
+    color: #ffd700; /* Título amarelo vibrante */
+    margin: 0;
+    font-weight: 700;
+    white-space: nowrap; 
+}
+
+.update-info {
+    /* Esta classe não é mais aplicada, mas está aqui caso precise no futuro */
+    font-size: 0.9em;
+    color: #cccccc;
+    margin: 5px 0 0 0;
+}
+
+.section-title {
+    color: #ffd700; /* Títulos de seção amarelos */
+    margin-top: 40px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #333333; /* Linha de divisão cinza escuro */
+    padding-bottom: 5px;
+}
+
+/* --- Estilos da Grade de KPIs e Cards --- */
+.kpi-grid {
+    display: grid;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.kpi-grid.five-columns {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.kpi-grid.three-columns {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.kpi-card {
+    background-color: #2a2a2a; 
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); 
+    text-align: center;
+    border-left: 5px solid #4a4a4a; 
+    color: #f0f0f0; 
+}
+
+.kpi-card h3 {
+    font-size: 1em;
+    color: #e0e0e0; 
+    margin-top: 0;
+    font-weight: 600;
+}
+
+.kpi-value {
+    font-size: 2.2em;
+    font-weight: bold;
+    color: #ffd700; 
+    margin: 5px 0;
+}
+
+.kpi-card small {
+    display: block;
+    color: #aaaaaa; 
+    margin-top: 10px;
+    font-size: 0.85em;
+}
+
+/* Destaques e Cores Especiais */
+.kpi-card.highlight {
+    border-left-color: #ffd700; 
+}
+
+.kpi-card.success-card {
+    border-left-color: #4caf50; 
+}
+
+.kpi-card.warning-card {
+    border-left-color: #f44336; 
+}
+
+/* Estilo para as listas internas (Top 3) */
+.kpi-list {
+    text-align: left;
+    padding: 10px 0 0 10px;
+}
+
+.kpi-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.kpi-list li {
+    font-size: 0.9em;
+    color: #f0f0f0; 
+    padding: 5px 0;
+}
+
+/* --- Responsividade --- */
+
+@media (max-width: 1200px) {
+    .kpi-grid.five-columns {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .kpi-grid.three-columns {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .kpi-grid.five-columns,
+    .kpi-grid.three-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .header-section {
+        padding: 15px 20px;
+    }
+    
+    .dashboard-title {
+        font-size: 1.8em;
+    }
+    
+    .header-content-wrapper {
+        flex-direction: column; 
+    }
+    .header-logo {
+        margin-right: 0; 
+        margin-bottom: 10px; 
+    }
+    .header-text-container {
+        text-align: center; 
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* --- Estilos para a Tabela de Dados (Adaptado ao SMVZAP) --- */
+/* ------------------------------------------------------------------ */
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 1em;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); 
+    background-color: #1a1a1a; 
+    border-radius: 8px; 
+    overflow: hidden; 
+}
+
+.header-cell {
+    background-color: #ffd700; 
+    color: #101010; 
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: 700;
+    border-bottom: 2px solid #333; 
+}
+
+.data-cell {
+    padding: 12px 12px;
+    border-bottom: 1px solid #333; 
+    text-align: left;
+    color: #f0f0f0; 
+}
+
+.data-row:nth-child(even) {
+    background-color: #222222; 
+}
+
+.data-row:hover {
+    background-color: #3a3a3a; 
+}
+
+/* Formatação Condicional para as Linhas (Cores Acionáveis no fundo escuro) */
+.data-row.alta-performance {
+    background-color: #1e4a24; 
+    color: #a4e5aa; 
+    font-weight: bold;
+}
+
+.data-row.baixa-eficiencia {
+    background-color: #5c181f; 
+    color: #e5a4a4; 
+    font-weight: bold;
+}
+
+.data-row.monitorar {
+    background-color: #5a4b1e; 
+    color: #e5d7a4; 
+}
+
+/* Estilo para o Dropdown */
+.Select-control, .Select-menu-outer, .Select-single-value {
+    background-color: #2a2a2a !important;
+    border-color: #444444 !important;
+    color: #f0f0f0 !important;
+}
+.Select-placeholder {
+    color: #aaaaaa !important;
+}
+.Select-value-label {
+    color: #f0f0f0 !important;
+}
+.Select-option {
+    background-color: #2a2a2a !important;
+    color: #f0f0f0 !important;
+}
+.Select-option.is-focused {
+    background-color: #3a3a3a !important;
+}
+.Select-option.is-selected {
+    background-color: #ffd700 !important;
+    color: #101010 !important;
+}
