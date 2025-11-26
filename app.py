@@ -7,6 +7,7 @@ import locale
 from datetime import datetime
 import plotly.graph_objects as go 
 import os  # <<< (necessário para pegar data do arquivo)
+import pytz  # <<< (necessário para corrigir fuso)
 
 # Configurar locale para formatação de números em português
 try:
@@ -55,10 +56,15 @@ except Exception as e:
     print(f"\n🚨 ERRO ao carregar ou processar a planilha: {e}")
     exit()
 
-# --- DATA DE ATUALIZAÇÃO ---
+# --- DATA DE ATUALIZAÇÃO (com correção de fuso) ---
 try:
     caminho_arquivo = 'data/dados.xlsx'
-    data_modificacao = datetime.fromtimestamp(os.path.getmtime(caminho_arquivo))
+    timestamp = os.path.getmtime(caminho_arquivo)
+
+    # Fuso horário de Brasília
+    fuso_brasilia = pytz.timezone("America/Sao_Paulo")
+    data_modificacao = datetime.fromtimestamp(timestamp, fuso_brasilia)
+
     ultima_atualizacao = data_modificacao.strftime("%d/%m/%Y %H:%M")
 except:
     ultima_atualizacao = "Data não encontrada"
