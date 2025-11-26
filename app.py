@@ -42,11 +42,15 @@ def carregar_dados():
             "nome","qtd_convites","meta_convites","progresso_convites",
             "confirmados","meta_confirmados","media_confirmados",
             "ligacoes_efetuadas","confirmacoes_ligacoes",
-            "vendedor_top_convites","qtd_top_convites"
+            "vendedor_top_convites","qtd_top_convites",
+            "vendedor_confirmado","convites_confirmados"
         ])
 
+    # Normaliza os nomes das colunas para facilitar mapeamento
     cols_lower = [c.strip().upper() for c in df_temp.columns]
     header_map = {}
+
+    # Mapear colunas principais
     if "NOME" in cols_lower:
         header_map[list(df_temp.columns)[cols_lower.index("NOME")]] = "nome"
     if "QUANTIDADE DE CONVITES" in cols_lower:
@@ -60,13 +64,15 @@ def carregar_dados():
     if "META DE CONFIRMADOS" in cols_lower:
         header_map[list(df_temp.columns)[cols_lower.index("META DE CONFIRMADOS")]] = "meta_confirmados"
     if "MÉDIA DE CONFIRMADOS" in cols_lower or "MEDIA DE CONFIRMADOS" in cols_lower:
-        header_map[list(df_temp.columns)[cols_lower.index("MÉDIA DE CONFIRMADOS" if "MÉDIA DE CONFIRMADOS" in cols_lower else "MEDIA DE CONFIRMADOS")]] = "media_confirmados"
+        idx = cols_lower.index("MÉDIA DE CONFIRMADOS") if "MÉDIA DE CONFIRMADOS" in cols_lower else cols_lower.index("MEDIA DE CONFIRMADOS")
+        header_map[list(df_temp.columns)[idx]] = "media_confirmados"
     if "LIGAÇÕES EFETUADAS" in cols_lower or "LIGACOES EFETUADAS" in cols_lower:
         idx = cols_lower.index("LIGAÇÕES EFETUADAS") if "LIGAÇÕES EFETUADAS" in cols_lower else cols_lower.index("LIGACOES EFETUADAS")
         header_map[list(df_temp.columns)[idx]] = "ligacoes_efetuadas"
     if "CONFIRMAÇÕES" in cols_lower or "CONFIRMACOES" in cols_lower:
         idx = cols_lower.index("CONFIRMAÇÕES") if "CONFIRMAÇÕES" in cols_lower else cols_lower.index("CONFIRMACOES")
         header_map[list(df_temp.columns)[idx]] = "confirmacoes_ligacoes"
+
     # --- Novas colunas para Top Vendedores ---
     if "VENDEDORES QUE ENVIARAM MAIS CONVITES" in cols_lower:
         idx = cols_lower.index("VENDEDORES QUE ENVIARAM MAIS CONVITES")
@@ -75,14 +81,25 @@ def carregar_dados():
         idx = cols_lower.index("CONVITES")
         header_map[list(df_temp.columns)[idx]] = "qtd_top_convites"
 
+    # --- Colunas para Top Vendedores com convites confirmados ---
+    if "VENDEDORES QUE TIVERAM MAIS CONFIRMAÇÕES" in cols_lower:
+        idx = cols_lower.index("VENDEDORES QUE TIVERAM MAIS CONFIRMAÇÕES")
+        header_map[list(df_temp.columns)[idx]] = "vendedor_confirmado"
+    if "CONVITES CONFIRMADOS" in cols_lower:
+        idx = cols_lower.index("CONVITES CONFIRMADOS")
+        header_map[list(df_temp.columns)[idx]] = "convites_confirmados"
+
+    # Renomeia as colunas conforme o mapeamento
     if header_map:
         df_temp = df_temp.rename(columns=header_map)
 
+    # Colunas esperadas no dataframe final
     expected_cols = [
         "nome","qtd_convites","meta_convites","progresso_convites",
         "confirmados","meta_confirmados","media_confirmados",
         "ligacoes_efetuadas","confirmacoes_ligacoes",
-        "vendedor_top_convites","qtd_top_convites"
+        "vendedor_top_convites","qtd_top_convites",
+        "vendedor_confirmado","convites_confirmados"
     ]
 
     # Ajusta colunas caso estejam faltando
@@ -95,12 +112,15 @@ def carregar_dados():
 
     df_temp = df_temp[expected_cols].copy()
     df_temp.dropna(subset=['nome'], inplace=True)
+
+    # Converte colunas numéricas
     for col in ["qtd_convites","meta_convites","progresso_convites","confirmados",
                 "meta_confirmados","media_confirmados","ligacoes_efetuadas",
-                "confirmacoes_ligacoes","qtd_top_convites"]:
+                "confirmacoes_ligacoes","qtd_top_convites","convites_confirmados"]:
         df_temp[col] = pd.to_numeric(df_temp[col], errors='coerce').fillna(0)
 
     return df_temp
+
 
 # ==================================
 # 🟨 FUNÇÃO ATUALIZADA: GERAR TABELA COM CORES
@@ -274,51 +294,47 @@ def gerar_layout(df):
                 ]),
             ]),
 
-            # 1.5 KPIs Dinâmicos (Top 10 / Top5 / Bottom5) - ADICIONADO SCROLL HORIZONTAL
+            # 1.5 KPIs Dinâmicos (6 Cards) - 3 em cima e 3 embaixo reorganizados
+            # Linha 1
             html.Div(className='kpi-grid three-columns', children=[
                 html.Div(className='kpi-card success-card destaque-loja', children=[
                     html.H3("🥇 Top 10 vendedores que enviaram mais convites"),
                     html.Div(id='kpi-top-10-convites', className="kpi-list", style={
-                        'overflowX': 'auto',
-                        'whiteSpace': 'nowrap',
-                        'maxWidth': '100%',
-                        'padding': '5px'
-                    })
-                ]),
-                html.Div(className='kpi-card warning-card', children=[
-                    html.H3("🐌 Top 5 lojas com menos confirmações"),
-                    html.Div(id='kpi-bottom-5-confirmados', className="kpi-list", style={
-                        'overflowX': 'auto',
-                        'whiteSpace': 'nowrap',
-                        'maxWidth': '100%',
-                        'padding': '5px'
+                        'overflowX': 'auto', 'whiteSpace': 'nowrap', 'maxWidth': '100%', 'padding': '5px'
                     })
                 ]),
                 html.Div(className='kpi-card success-card', children=[
                     html.H3("🚀 Top 5 lojas que mais enviaram convites"),
                     html.Div(id='kpi-top-5-convites', className="kpi-list", style={
-                        'overflowX': 'auto',
-                        'whiteSpace': 'nowrap',
-                        'maxWidth': '100%',
-                        'padding': '5px'
+                        'overflowX': 'auto', 'whiteSpace': 'nowrap', 'maxWidth': '100%', 'padding': '5px'
                     })
                 ]),
                 html.Div(className='kpi-card success-card', children=[
                     html.H3("🥇🥈🥉 Top 5 lojas com mais confirmações"),
                     html.Div(id='kpi-top-3-confirmadas', className="kpi-list", style={
-                        'overflowX': 'auto',
-                        'whiteSpace': 'nowrap',
-                        'maxWidth': '100%',
-                        'padding': '5px'
+                        'overflowX': 'auto', 'whiteSpace': 'nowrap', 'maxWidth': '100%', 'padding': '5px'
+                    })
+                ]),
+            ]),
+
+            # Linha 2
+            html.Div(className='kpi-grid three-columns', children=[
+                html.Div(className='kpi-card success-card destaque-loja', children=[
+                    html.H3("🥇 Top 10 vendedores com convites confirmados"),
+                    html.Div(id='kpi-top-10-confirmados', className="kpi-list", style={
+                        'overflowX': 'auto', 'whiteSpace': 'nowrap', 'maxWidth': '100%', 'padding': '5px'
+                    })
+                ]),
+                html.Div(className='kpi-card warning-card', children=[
+                    html.H3("🐌 Top 5 lojas com menos confirmações"),
+                    html.Div(id='kpi-bottom-5-confirmados', className="kpi-list", style={
+                        'overflowX': 'auto', 'whiteSpace': 'nowrap', 'maxWidth': '100%', 'padding': '5px'
                     })
                 ]),
                 html.Div(className='kpi-card warning-card', children=[
                     html.H3("🐢 Top 5 lojas que menos enviaram convites"),
                     html.Div(id='kpi-bottom-3-convites', className="kpi-list", style={
-                        'overflowX': 'auto',
-                        'whiteSpace': 'nowrap',
-                        'maxWidth': '100%',
-                        'padding': '5px'
+                        'overflowX': 'auto', 'whiteSpace': 'nowrap', 'maxWidth': '100%', 'padding': '5px'
                     })
                 ]),
             ]),
@@ -346,7 +362,6 @@ def gerar_layout(df):
             html.Div(id='grafico-performance-bolhas', style={'display': 'none'}),
         ])
     ])
-
 
 # ==========================
 # INICIALIZAÇÃO DO DASH
@@ -486,6 +501,27 @@ def atualizar_top5_envios_convites(n):
     for i, row in top5.iterrows():
         texto = f"🚀 {row['nome']}: {int(row['qtd_convites'])} convites"
         lista.append(html.Div(texto, style={"color": "#009933", "fontWeight": "600", "marginBottom": "6px"}))
+    return lista
+
+@app.callback(
+    Output('kpi-top-10-confirmados', 'children'),
+    Input('interval-update-data', 'n_intervals')
+)
+def atualizar_top10_confirmados(n):
+    df_local = carregar_dados()
+    if df_local.empty:
+        return []
+
+    # Ordena pelos maiores convites confirmados
+    top10_confirmados = df_local.sort_values(by='convites_confirmados', ascending=False).head(10).reset_index(drop=True)
+    
+    lista = []
+    for i, row in top10_confirmados.iterrows():
+        texto = f"{i+1}º {row['vendedor_confirmado']}: {int(row['convites_confirmados'])} confirmados"
+        lista.append(html.Div(
+            texto,
+            style={"color": "#006600", "fontWeight": "600", "marginBottom": "6px"}
+        ))
     return lista
 
 # ==========================
