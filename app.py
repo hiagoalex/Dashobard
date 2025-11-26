@@ -42,15 +42,15 @@ def carregar_dados():
             "nome","qtd_convites","meta_convites","progresso_convites",
             "confirmados","meta_confirmados","media_confirmados",
             "ligacoes_efetuadas","confirmacoes_ligacoes",
-            "vendedor_top_convites","qtd_top_convites",
-            "vendedor_confirmado","convites_confirmados"
+            "vendedor_top_convites","unidade_top_convites","qtd_top_convites",
+            "vendedor_confirmado","unidade_confirmado","convites_confirmados"
         ])
 
-    # Normaliza os nomes das colunas para facilitar mapeamento
+    # Normaliza os nomes das colunas
     cols_lower = [c.strip().upper() for c in df_temp.columns]
     header_map = {}
 
-    # Mapear colunas principais
+    # --------------------------- COLUNAS PRINCIPAIS ---------------------------
     if "NOME" in cols_lower:
         header_map[list(df_temp.columns)[cols_lower.index("NOME")]] = "nome"
     if "QUANTIDADE DE CONVITES" in cols_lower:
@@ -73,23 +73,29 @@ def carregar_dados():
         idx = cols_lower.index("CONFIRMAÇÕES") if "CONFIRMAÇÕES" in cols_lower else cols_lower.index("CONFIRMACOES")
         header_map[list(df_temp.columns)[idx]] = "confirmacoes_ligacoes"
 
-    # --- Novas colunas para Top Vendedores ---
+    # --------------------------- TOP 10 MAIS CONVITES --------------------------
     if "VENDEDORES QUE ENVIARAM MAIS CONVITES" in cols_lower:
         idx = cols_lower.index("VENDEDORES QUE ENVIARAM MAIS CONVITES")
         header_map[list(df_temp.columns)[idx]] = "vendedor_top_convites"
+    if "UNIDADES" in cols_lower:
+        idx = cols_lower.index("UNIDADES")
+        header_map[list(df_temp.columns)[idx]] = "unidade_top_convites"
     if "CONVITES" in cols_lower:
         idx = cols_lower.index("CONVITES")
         header_map[list(df_temp.columns)[idx]] = "qtd_top_convites"
 
-    # --- Colunas para Top Vendedores com convites confirmados ---
+    # ----------------- TOP 10 COM CONVITES CONFIRMADOS -------------------------
     if "VENDEDORES QUE TIVERAM MAIS CONFIRMAÇÕES" in cols_lower:
         idx = cols_lower.index("VENDEDORES QUE TIVERAM MAIS CONFIRMAÇÕES")
         header_map[list(df_temp.columns)[idx]] = "vendedor_confirmado"
+    if "UNIDADES" in cols_lower:
+        # Aqui precisamos mapear essa UNIDADE para o ranking de confirmados também
+        header_map[list(df_temp.columns)[idx]] = "unidade_confirmado"
     if "CONVITES CONFIRMADOS" in cols_lower:
         idx = cols_lower.index("CONVITES CONFIRMADOS")
         header_map[list(df_temp.columns)[idx]] = "convites_confirmados"
 
-    # Renomeia as colunas conforme o mapeamento
+    # Renomear colunas
     if header_map:
         df_temp = df_temp.rename(columns=header_map)
 
@@ -98,11 +104,11 @@ def carregar_dados():
         "nome","qtd_convites","meta_convites","progresso_convites",
         "confirmados","meta_confirmados","media_confirmados",
         "ligacoes_efetuadas","confirmacoes_ligacoes",
-        "vendedor_top_convites","qtd_top_convites",
-        "vendedor_confirmado","convites_confirmados"
+        "vendedor_top_convites","unidade_top_convites","qtd_top_convites",
+        "vendedor_confirmado","unidade_confirmado","convites_confirmados"
     ]
 
-    # Ajusta colunas caso estejam faltando
+    # Ajusta colunas faltantes
     if not all(c in df_temp.columns for c in expected_cols):
         if len(df_temp.columns) >= len(expected_cols):
             df_temp = df_temp.iloc[:, :len(expected_cols)]
@@ -113,14 +119,13 @@ def carregar_dados():
     df_temp = df_temp[expected_cols].copy()
     df_temp.dropna(subset=['nome'], inplace=True)
 
-    # Converte colunas numéricas
+    # Converte números
     for col in ["qtd_convites","meta_convites","progresso_convites","confirmados",
                 "meta_confirmados","media_confirmados","ligacoes_efetuadas",
                 "confirmacoes_ligacoes","qtd_top_convites","convites_confirmados"]:
         df_temp[col] = pd.to_numeric(df_temp[col], errors='coerce').fillna(0)
 
     return df_temp
-
 
 # ==================================
 # 🟨 FUNÇÃO ATUALIZADA: GERAR TABELA COM CORES
@@ -393,7 +398,6 @@ def exibir_detalhe_unidade(selected_unidade):
     if not selected_unidade:
         return "", {'display': 'none'}
     
-
     df_current = carregar_dados().copy()
     unidade = df_current[df_current['nome'] == selected_unidade].iloc[0]
 
@@ -451,7 +455,10 @@ def atualizar_bottom5_convites(n):
         lista.append(html.Div(texto, style={"color": "#cc6600", "fontWeight": "600", "marginBottom": "6px"}))
     return lista
 
-# Callbacks para preencher os KPIs
+# =============================
+# ALTERAÇÃO 1
+# TOP 10 VENDEDORES QUE ENVIOU CONVITES (AGORA COM LOJA)
+# =============================
 @app.callback(
     Output('kpi-top-10-convites', 'children'),
     Input('interval-update-data', 'n_intervals')
@@ -461,12 +468,11 @@ def atualizar_top10_convites(n):
     if df_local.empty:
         return []
 
-    # Ordena pelos maiores envios de convites
     top10 = df_local.sort_values(by='qtd_top_convites', ascending=False).head(10).reset_index(drop=True)
     
     lista = []
     for i, row in top10.iterrows():
-        texto = f"{i+1}º {row['vendedor_top_convites']}: {formatar_numero(row['qtd_top_convites'])} convites"
+        texto = f"{i+1}º {row['vendedor_top_convites']} ({row['unidade_top_convites']}): {formatar_numero(row['qtd_top_convites'])} convites"
         lista.append(html.Div(
             texto,
             style={"color": "#0066cc", "fontWeight": "600", "marginBottom": "6px"}
@@ -503,6 +509,10 @@ def atualizar_top5_envios_convites(n):
         lista.append(html.Div(texto, style={"color": "#009933", "fontWeight": "600", "marginBottom": "6px"}))
     return lista
 
+# =============================
+# ALTERAÇÃO 2
+# TOP 10 VENDEDORES COM CONVITES CONFIRMADOS (AGORA COM LOJA)
+# =============================
 @app.callback(
     Output('kpi-top-10-confirmados', 'children'),
     Input('interval-update-data', 'n_intervals')
@@ -512,17 +522,17 @@ def atualizar_top10_confirmados(n):
     if df_local.empty:
         return []
 
-    # Ordena pelos maiores convites confirmados
     top10_confirmados = df_local.sort_values(by='convites_confirmados', ascending=False).head(10).reset_index(drop=True)
     
     lista = []
     for i, row in top10_confirmados.iterrows():
-        texto = f"{i+1}º {row['vendedor_confirmado']}: {int(row['convites_confirmados'])} confirmados"
+        texto = f"{i+1}º {row['vendedor_confirmado']} ({row['unidade_confirmado']}): {int(row['convites_confirmados'])} confirmados"
         lista.append(html.Div(
             texto,
             style={"color": "#006600", "fontWeight": "600", "marginBottom": "6px"}
         ))
     return lista
+
 
 # ==========================
 # CALLBACK: Tabela Geral
