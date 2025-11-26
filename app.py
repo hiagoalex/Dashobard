@@ -6,6 +6,7 @@ import plotly.express as px
 import locale
 from datetime import datetime
 import plotly.graph_objects as go 
+import os  # <<< (necessário para pegar data do arquivo)
 
 # Configurar locale para formatação de números em português
 try:
@@ -54,6 +55,15 @@ except Exception as e:
     print(f"\n🚨 ERRO ao carregar ou processar a planilha: {e}")
     exit()
 
+# --- DATA DE ATUALIZAÇÃO ---
+try:
+    caminho_arquivo = 'data/dados.xlsx'
+    data_modificacao = datetime.fromtimestamp(os.path.getmtime(caminho_arquivo))
+    ultima_atualizacao = data_modificacao.strftime("%d/%m/%Y %H:%M")
+except:
+    ultima_atualizacao = "Data não encontrada"
+
+
 # --- 2. CÁLCULO DE KPIS GLOBAIS ---
 total_convites = df['qtd_convites'].sum()
 meta_convites_global = df['meta_convites'].sum()
@@ -81,19 +91,30 @@ app.layout = html.Div(children=[
 
     # CABEÇALHO COM LOGO
     html.Div(className='header-section', children=[
-        html.Div(className='header-content-wrapper', children=[
-            html.Div(className='header-text-container', style={'display': 'flex', 'align-items': 'center'}, children=[
-                html.Img(
-                    src='/assets/logo.png',
-                    style={'height': '180px', 'width': 'auto', 'margin-right': '15px'}
-                ),
+    html.Div(className='header-content-wrapper', children=[
+        html.Div(className='header-text-container', style={'display': 'flex', 'align-items': 'center'}, children=[
+            html.Img(
+                src='/assets/logo.png',
+                style={'height': '180px', 'width': 'auto', 'margin-right': '15px'}
+            ),
+            html.Div(children=[  # << Agrupando título + data
                 html.H1(
                     "🏆 Dashboard de Performance por Unidades - Grupo Primavia",
                     className='dashboard-title grupo-Primavia-header'
                 ),
+                html.Div(
+                    f"📅 Última atualização dos dados: {ultima_atualizacao}",
+                    style={
+                        'fontSize': '16px',
+                        'color': '#374151',
+                        'fontWeight': '600',
+                        'marginTop': '5px'
+                    }
+                )
             ])
         ])
-    ]),
+    ])
+]),
 
     html.Div(className='dash-app-content', children=[
         
