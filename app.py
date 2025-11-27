@@ -31,181 +31,98 @@ def formatar_numero(n):
 URL_SHEETS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRRoTZ50By6BN1ThLry1WykGR57GTaH5pmvBZUxLqU2gnBV3qUZGlBFk4FkMaSAUw/pub?gid=1684851949&single=true&output=csv"
 
 # ==========================
-# FUNÇÃO PARA CARREGAR DADOS (VERSÃO ROBUSTA)
+# FUNÇÃO PARA CARREGAR DADOS
 # ==========================
 def carregar_dados():
     try:
         df_temp = pd.read_csv(URL_SHEETS, header=0)
     except Exception as e:
         print(f"Erro ao ler Google Sheets: {e}")
-        # Retorna DataFrame vazio com as colunas padronizadas esperadas
         return pd.DataFrame(columns=[
-            "nome","qtd_convites","confirmados","meta_convites","progresso_convites",
-            "meta_confirmados","media_confirmados","ligacoes_efetuadas","confirmacoes_ligacoes",
+            "nome","qtd_convites","meta_convites","progresso_convites",
+            "confirmados","meta_confirmados","media_confirmados",
+            "ligacoes_efetuadas","confirmacoes_ligacoes",
             "vendedor_top_convites","unidade_top_convites","qtd_top_convites",
-            "vendedor_confirmado","unidade_confirmados","convites_confirmados"
+            "vendedor_confirmado","unidade_confirmado","convites_confirmados"
         ])
 
-    # lista de cabeçalhos normalizados (maiúsculos, sem espaços laterais)
-    cols_clean = [c.strip() for c in df_temp.columns]
-    cols_upper = [c.upper() for c in cols_clean]
-
+    # Normaliza os nomes das colunas
+    cols_lower = [c.strip().upper() for c in df_temp.columns]
     header_map = {}
 
-    # helper para mapear por nome (se existir)
-    def map_if_exists(name_upper, target):
-        if name_upper in cols_upper:
-            header_map[cols_clean[cols_upper.index(name_upper)]] = target
-            return True
-        return False
+    # --------------------------- COLUNAS PRINCIPAIS ---------------------------
+    if "NOME" in cols_lower:
+        header_map[list(df_temp.columns)[cols_lower.index("NOME")]] = "nome"
+    if "QUANTIDADE DE CONVITES" in cols_lower:
+        header_map[list(df_temp.columns)[cols_lower.index("QUANTIDADE DE CONVITES")]] = "qtd_convites"
+    if "META" in cols_lower:
+        header_map[list(df_temp.columns)[cols_lower.index("META")]] = "meta_convites"
+    if "PROGRESSO DE CONVITES" in cols_lower:
+        header_map[list(df_temp.columns)[cols_lower.index("PROGRESSO DE CONVITES")]] = "progresso_convites"
+    if "CONFIRMADOS" in cols_lower:
+        header_map[list(df_temp.columns)[cols_lower.index("CONFIRMADOS")]] = "confirmados"
+    if "META DE CONFIRMADOS" in cols_lower:
+        header_map[list(df_temp.columns)[cols_lower.index("META DE CONFIRMADOS")]] = "meta_confirmados"
+    if "MÉDIA DE CONFIRMADOS" in cols_lower or "MEDIA DE CONFIRMADOS" in cols_lower:
+        idx = cols_lower.index("MÉDIA DE CONFIRMADOS") if "MÉDIA DE CONFIRMADOS" in cols_lower else cols_lower.index("MEDIA DE CONFIRMADOS")
+        header_map[list(df_temp.columns)[idx]] = "media_confirmados"
+    if "LIGAÇÕES EFETUADAS" in cols_lower or "LIGACOES EFETUADAS" in cols_lower:
+        idx = cols_lower.index("LIGAÇÕES EFETUADAS") if "LIGAÇÕES EFETUADAS" in cols_lower else cols_lower.index("LIGACOES EFETUADAS")
+        header_map[list(df_temp.columns)[idx]] = "ligacoes_efetuadas"
+    if "CONFIRMAÇÕES" in cols_lower or "CONFIRMACOES" in cols_lower:
+        idx = cols_lower.index("CONFIRMAÇÕES") if "CONFIRMAÇÕES" in cols_lower else cols_lower.index("CONFIRMACOES")
+        header_map[list(df_temp.columns)[idx]] = "confirmacoes_ligacoes"
 
-    # Mapeamentos diretos (variants comuns)
-    map_if_exists("NOME", "nome")
-    map_if_exists("QUANTIDADE DE CONVITES", "qtd_convites")
-    # 'CONFIRMADOS' aparece na sua planilha (maiusculo)
-    map_if_exists("CONFIRMADOS", "confirmados")
-    map_if_exists("META", "meta_convites")
-    map_if_exists("PROGRESSO DE CONVITES", "progresso_convites")
-    map_if_exists("META DE CONFIRMADOS", "meta_confirmados")
-    # média de confirmados pode vir com acento ou sem
-    if "MÉDIA DE CONFIRMADOS" in cols_upper:
-        header_map[cols_clean[cols_upper.index("MÉDIA DE CONFIRMADOS")]] = "media_confirmados"
-    elif "MEDIA DE CONFIRMADOS" in cols_upper:
-        header_map[cols_clean[cols_upper.index("MEDIA DE CONFIRMADOS")]] = "media_confirmados"
-    # ligações efetuadas variantes
-    if "LIGAÇÕES EFETUADAS" in cols_upper:
-        header_map[cols_clean[cols_upper.index("LIGAÇÕES EFETUADAS")]] = "ligacoes_efetuadas"
-    elif "LIGACOES EFETUADAS" in cols_upper:
-        header_map[cols_clean[cols_upper.index("LIGACOES EFETUADAS")]] = "ligacoes_efetuadas"
-    # confirmações gerais (se existir)
-    if "CONFIRMAÇÕES" in cols_upper:
-        header_map[cols_clean[cols_upper.index("CONFIRMAÇÕES")]] = "confirmacoes_ligacoes"
-    elif "CONFIRMACOES" in cols_upper:
-        header_map[cols_clean[cols_upper.index("CONFIRMACOES")]] = "confirmacoes_ligacoes"
+    # --------------------------- TOP 10 MAIS CONVITES --------------------------
+    if "VENDEDORES QUE ENVIARAM MAIS CONVITES" in cols_lower:
+        idx = cols_lower.index("VENDEDORES QUE ENVIARAM MAIS CONVITES")
+        header_map[list(df_temp.columns)[idx]] = "vendedor_top_convites"
+    if "UNIDADES" in cols_lower:
+        idx = cols_lower.index("UNIDADES")
+        header_map[list(df_temp.columns)[idx]] = "unidade_top_convites"
+    if "CONVITES" in cols_lower:
+        idx = cols_lower.index("CONVITES")
+        header_map[list(df_temp.columns)[idx]] = "qtd_top_convites"
 
-    # ---------------------------
-    # TOP VENDEDORES (convites)
-    # ---------------------------
-    # vendedor_top_convites (coluna "VENDEDORES QUE ENVIARAM MAIS CONVITES")
-    if "VENDEDORES QUE ENVIARAM MAIS CONVITES" in cols_upper:
-        idx_vtop = cols_upper.index("VENDEDORES QUE ENVIARAM MAIS CONVITES")
-        header_map[cols_clean[idx_vtop]] = "vendedor_top_convites"
+    # ----------------- TOP 10 COM CONVITES CONFIRMADOS -------------------------
+    if "VENDEDORES QUE TIVERAM MAIS CONFIRMAÇÕES" in cols_lower:
+        idx = cols_lower.index("VENDEDORES QUE TIVERAM MAIS CONFIRMAÇÕES")
+        header_map[list(df_temp.columns)[idx]] = "vendedor_confirmado"
+    if "UNIDADES" in cols_lower:
+        # Aqui precisamos mapear essa UNIDADE para o ranking de confirmados também
+        header_map[list(df_temp.columns)[idx]] = "unidade_confirmado"
+    if "CONVITES CONFIRMADOS" in cols_lower:
+        idx = cols_lower.index("CONVITES CONFIRMADOS")
+        header_map[list(df_temp.columns)[idx]] = "convites_confirmados"
 
-        # busca a primeira UNIDADES que aparece *após* esse índice
-        unidades_indices = [i for i, c in enumerate(cols_upper) if c == "UNIDADES"]
-        unidade_idx = None
-        for ui in unidades_indices:
-            if ui > idx_vtop:
-                unidade_idx = ui
-                break
-        if unidade_idx is not None:
-            header_map[cols_clean[unidade_idx]] = "unidade_top_convites"
-        else:
-            # fallback: se existir qualquer 'UNIDADES', pega a primeira
-            if unidades_indices:
-                header_map[cols_clean[unidades_indices[0]]] = "unidade_top_convites"
-
-        # busca o CONVITES relacionado (procura 'CONVITES' após idx_vtop)
-        conv_indices = [i for i, c in enumerate(cols_upper) if c == "CONVITES"]
-        conv_idx = None
-        for ci in conv_indices:
-            if ci > idx_vtop:
-                conv_idx = ci
-                break
-        if conv_idx is not None:
-            header_map[cols_clean[conv_idx]] = "qtd_top_convites"
-        else:
-            # fallback: se existir 'CONVITES' em qualquer lugar, pega a primeira
-            if conv_indices:
-                header_map[cols_clean[conv_indices[0]]] = "qtd_top_convites"
-
-    # ---------------------------
-    # TOP VENDEDORES (confirmados)
-    # ---------------------------
-    # vendedor_confirmado pode aparecer como 'vendedor_confirmado' (minúscula) ou como 'VENDEDORES QUE TIVERAM MAIS CONFIRMAÇÕES'
-    # tenta mapear vários formatos:
-    if "VENDEDORES QUE TIVERAM MAIS CONFIRMAÇÕES" in cols_upper:
-        idx_vconf = cols_upper.index("VENDEDORES QUE TIVERAM MAIS CONFIRMAÇÕES")
-        header_map[cols_clean[idx_vconf]] = "vendedor_confirmado"
-    elif "VENDEDORES" in cols_upper and "CONFIRMAÇÕES" in cols_upper:
-        # fallback genérico (não esperado, mas seguro)
-        try:
-            idx_vconf = cols_upper.index("VENDEDORES")
-            header_map[cols_clean[idx_vconf]] = "vendedor_confirmado"
-        except Exception:
-            pass
-    # também mapeia se a coluna vier exatamente como 'vendedor_confirmado' (minúscula)
-    for i, c in enumerate(cols_clean):
-        if c.strip().lower() == "vendedor_confirmado":
-            header_map[c] = "vendedor_confirmado"
-            idx_vconf = i
-            break
-
-    # agora localizar a UNIDADE que pertence a esse vendedor_confirmado
-    if 'idx_vconf' in locals():
-        unidades_indices = [i for i, c in enumerate(cols_upper) if c == "UNIDADES"]
-        unidade_conf_idx = None
-        for ui in unidades_indices:
-            if ui > idx_vconf:
-                unidade_conf_idx = ui
-                break
-        if unidade_conf_idx is not None:
-            header_map[cols_clean[unidade_conf_idx]] = "unidade_confirmados"
-        else:
-            # fallback: se houver mais de uma UNIDADES, pega a segunda ocorrência
-            if len(unidades_indices) > 1:
-                header_map[cols_clean[unidades_indices[1]]] = "unidade_confirmados"
-
-    # convites_confirmados: busca coluna 'CONVITES CONFIRMADOS' ou 'convites_confirmados'
-    if "CONVITES CONFIRMADOS" in cols_upper:
-        idx_cc = cols_upper.index("CONVITES CONFIRMADOS")
-        header_map[cols_clean[idx_cc]] = "convites_confirmados"
-    else:
-        # tenta por nome exato minúsculo
-        for i, c in enumerate(cols_clean):
-            if c.strip().lower() == "convites_confirmados":
-                header_map[c] = "convites_confirmados"
-                break
-
-    # ---------------------------
-    # Renomeia conforme o mapeamento (se houver)
-    # ---------------------------
+    # Renomear colunas
     if header_map:
         df_temp = df_temp.rename(columns=header_map)
 
-    # ---------------------------
-    # Colunas esperadas padrão no retorno
-    # ---------------------------
+    # Colunas esperadas no dataframe final
     expected_cols = [
-        "nome","qtd_convites","confirmados","meta_convites","progresso_convites",
-        "meta_confirmados","media_confirmados","ligacoes_efetuadas","confirmacoes_ligacoes",
+        "nome","qtd_convites","meta_convites","progresso_convites",
+        "confirmados","meta_confirmados","media_confirmados",
+        "ligacoes_efetuadas","confirmacoes_ligacoes",
         "vendedor_top_convites","unidade_top_convites","qtd_top_convites",
-        "vendedor_confirmado","unidade_confirmados","convites_confirmados"
+        "vendedor_confirmado","unidade_confirmado","convites_confirmados"
     ]
 
-    # se alguma coluna esperada estiver faltando, cria com 0 ou string vazia (para textos)
-    for col in expected_cols:
-        if col not in df_temp.columns:
-            # para colunas textuais, colocar string vazia; numéricas -> 0
-            if col in ["nome","vendedor_top_convites","unidade_top_convites","vendedor_confirmado","unidade_confirmados"]:
-                df_temp[col] = ""
-            else:
-                df_temp[col] = 0
+    # Ajusta colunas faltantes
+    if not all(c in df_temp.columns for c in expected_cols):
+        if len(df_temp.columns) >= len(expected_cols):
+            df_temp = df_temp.iloc[:, :len(expected_cols)]
+            df_temp.columns = expected_cols
+        else:
+            return pd.DataFrame(columns=expected_cols)
 
-    # Reordena e retorna somente as expected_cols
     df_temp = df_temp[expected_cols].copy()
+    df_temp.dropna(subset=['nome'], inplace=True)
 
-    # Remove linhas sem nome (se aplicável)
-    if 'nome' in df_temp.columns:
-        df_temp.dropna(subset=['nome'], inplace=True)
-
-    # Converte colunas que devem ser numéricas
-    numeric_cols = [
-        "qtd_convites","confirmados","meta_convites","progresso_convites",
-        "meta_confirmados","media_confirmados","ligacoes_efetuadas",
-        "confirmacoes_ligacoes","qtd_top_convites","convites_confirmados"
-    ]
-    for col in numeric_cols:
+    # Converte números
+    for col in ["qtd_convites","meta_convites","progresso_convites","confirmados",
+                "meta_confirmados","media_confirmados","ligacoes_efetuadas",
+                "confirmacoes_ligacoes","qtd_top_convites","convites_confirmados"]:
         df_temp[col] = pd.to_numeric(df_temp[col], errors='coerce').fillna(0)
 
     return df_temp
@@ -609,8 +526,7 @@ def atualizar_top10_confirmados(n):
     
     lista = []
     for i, row in top10_confirmados.iterrows():
-        texto = f"{i+1}º {row['vendedor_confirmado']} ({row['unidade_confirmados']}): {int(row['convites_confirmados'])} confirmados"
-        
+        texto = f"{i+1}º {row['vendedor_confirmado']} ({row['unidade_confirmado']}): {int(row['convites_confirmados'])} confirmados"
         lista.append(html.Div(
             texto,
             style={"color": "#006600", "fontWeight": "600", "marginBottom": "6px"}
