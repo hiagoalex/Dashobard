@@ -331,14 +331,14 @@ def gerar_layout(df):
                     })
                 ]),
                 html.Div(className='kpi-card warning-card', children=[
-                    html.H3("🐌 Top 5 lojas com menos confirmações"),
-                    html.Div(id='kpi-bottom-5-confirmados', className="kpi-list", style={
+                    html.H3("🐢 Top 5 lojas que menos enviaram convites"),
+                    html.Div(id='kpi-bottom-3-convites', className="kpi-list", style={
                         'overflowX': 'auto', 'whiteSpace': 'nowrap', 'maxWidth': '100%', 'padding': '5px'
                     })
                 ]),
                 html.Div(className='kpi-card warning-card', children=[
-                    html.H3("🐢 Top 5 lojas que menos enviaram convites"),
-                    html.Div(id='kpi-bottom-3-convites', className="kpi-list", style={
+                    html.H3("🐌 Top 5 lojas com menos confirmações"),
+                    html.Div(id='kpi-bottom-5-confirmados', className="kpi-list", style={
                         'overflowX': 'auto', 'whiteSpace': 'nowrap', 'maxWidth': '100%', 'padding': '5px'
                     })
                 ]),
